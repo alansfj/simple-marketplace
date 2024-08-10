@@ -8,10 +8,8 @@ export class Server {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-
     app.listen(envs.PORT, () => {
-      console.log(`Server running on port ${envs.PORT}`)
-    })
-
+      console.log(`Server running on port ${envs.PORT}`);
+    });
   }
 }
