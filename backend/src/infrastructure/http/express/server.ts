@@ -1,5 +1,6 @@
 import express from "express";
-import { envs } from "../../../adapters/envs";
+import { envs } from "../../../adapters";
+import { AppRoutes } from "./app.routes";
 
 export class Server {
   static start() {
@@ -7,6 +8,8 @@ export class Server {
 
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+
+    app.use(AppRoutes.routes);
 
     app.listen(envs.PORT, () => {
       console.log(`Server running on port ${envs.PORT}`);

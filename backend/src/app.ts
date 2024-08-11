@@ -1,4 +1,4 @@
-import { Server as ExpressServer } from "./infrastructure/http/express/server";
+import { Server as ExpressServer } from "./infrastructure/http/express";
 
 (async () => {
   main();
