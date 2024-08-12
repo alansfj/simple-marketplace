@@ -41,7 +41,9 @@ export class AuthKyselyPostgresRepository implements AuthRepositoryInterface {
     }
   }
 
-  async login(dto: LoginUserDto): Promise<UserEntity> {
+  async login(
+    dto: LoginUserDto
+  ): Promise<{ user: UserEntity; accessToken: string; refreshToken: string }> {
     try {
       const { email, password } = dto;
 
@@ -61,13 +63,37 @@ export class AuthKyselyPostgresRepository implements AuthRepositoryInterface {
       if (!isCorrectPassword)
         throw CustomError.badRequest(`user email or password wrong`);
 
-      const token = await JWT.generateToken({ id: user.id, email: user.email });
+      const accessToken = await JWT.generateToken(
+        {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+        "15m"
+      );
 
-      if (!token) throw CustomError.internalServer("error creating jwt");
+      if (!accessToken) throw CustomError.internalServer("error creating jwt");
 
-      return UserEntity.fromObjectPublic(user);
+      const refreshToken = await JWT.generateToken(
+        {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+        "1d"
+      );
+
+      if (!refreshToken) throw CustomError.internalServer("error creating jwt");
+
+      return {
+        user: UserEntity.fromObjectPublic(user),
+        accessToken,
+        refreshToken,
+      };
     } catch (error) {
       throw error;
     }
   }
+
+  async logout() {}
 }

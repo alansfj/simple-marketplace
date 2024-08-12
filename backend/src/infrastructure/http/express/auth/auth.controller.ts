@@ -28,7 +28,37 @@ export class AuthController {
 
     this.service
       .login(dto!)
-      .then((user) => res.json(user))
+      .then(({ user, accessToken, refreshToken }) =>
+        res
+          .cookie("access_token", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 15,
+          })
+          .cookie("refresh_token", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24,
+          })
+          .json(user)
+      )
+      .catch((error) => {
+        // console.log(error);
+        res.status(error.statusCode || 500).json({ error: error.message });
+      });
+  };
+
+  logout = (req: Request, res: Response) => {
+    this.service
+      .logout()
+      .then(() => {
+        res
+          .clearCookie("access_token")
+          .clearCookie("refresh_token")
+          .json({ message: "logout successful" });
+      })
       .catch((error) => {
         // console.log(error);
         res.status(error.statusCode || 500).json({ error: error.message });

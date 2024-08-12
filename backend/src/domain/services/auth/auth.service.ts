@@ -10,7 +10,13 @@ export class AuthService implements AuthServiceInterface {
     return await this.authRepository.register(dto);
   }
 
-  async login(dto: LoginUserDto): Promise<UserEntity> {
+  async login(
+    dto: LoginUserDto
+  ): Promise<{ user: UserEntity; accessToken: string; refreshToken: string }> {
     return await this.authRepository.login(dto);
+  }
+
+  async logout(): Promise<void> {
+    return await this.authRepository.logout();
   }
 }

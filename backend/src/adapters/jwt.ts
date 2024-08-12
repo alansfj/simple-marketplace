@@ -6,7 +6,7 @@ const JWT_SEED = envs.JWT_SEED;
 export const JWT = {
   async generateToken(
     payload: any,
-    duration: string = "1h"
+    duration: string | number = "1h"
   ): Promise<string | null> {
     return new Promise((resolve) => {
       jwt.sign(payload, JWT_SEED, { expiresIn: duration }, (error, token) => {
