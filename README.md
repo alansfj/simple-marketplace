@@ -10,8 +10,8 @@
 5. Ejecutar el comando ```npm run dev```
 
 ## Migraciones:
-1. Para crear una migracion se ejecuta el comando ```npm run pg-migration create {{migration-name}}```
+1. Para crear una migracion se ejecuta el comando ```npm run pg-migrate create {{migration-name}}```
 2. Se modifica el archivo de la migracion creada y se guarda
-3. Se ejecuta el comando ```npm run pg-migration up``` o ```npm run pg-migration down``` segun la migracion
+3. Se ejecuta el comando ```npm run pg-migrate up``` o ```npm run pg-migrate down``` segun la migracion
 4. Cada que se ejecute una migracion es importante ejecutar el comando ```npm run kysely-codegen``` 
 para que kysely genere los tipos
