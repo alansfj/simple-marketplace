@@ -9,36 +9,69 @@ export class StoresKyselyPostgresRepository
 {
   async create(dto: CreateStoreDto): Promise<StoreEntity> {
     try {
-      const { name, user_id } = dto;
+      const { name, user_id, categories } = dto;
 
-      // TODO:
-      // Los ids de las categorias de la tienda deben llegar a este punto
-      // y ser insertadas en la tabla de stores_category
+      const storeCateogoriesObj = await kysely
+        .transaction()
+        .execute(async (trx) => {
+          await trx
+            .selectFrom("users")
+            .where("id", "=", user_id)
+            .executeTakeFirstOrThrow(() =>
+              CustomError.badRequest("user not exists")
+            );
 
-      const user = await kysely
-        .selectFrom("users")
-        .select("id")
-        .where("id", "=", user_id)
-        .executeTakeFirst();
+          const newStore = await trx
+            .insertInto("stores")
+            .values({
+              name: name,
+              user_id: user_id,
+            })
+            .returningAll()
+            .executeTakeFirstOrThrow(() =>
+              CustomError.internalServer(
+                "something went wrong at creating store"
+              )
+            );
 
-      if (!user) throw CustomError.badRequest("user not exists");
+          const storeCategories = await Promise.all(
+            categories.map(async (category_id) => {
+              const category = await trx
+                .selectFrom("categories")
+                .selectAll()
+                .where("id", "=", category_id)
+                .executeTakeFirstOrThrow(() =>
+                  CustomError.badRequest(
+                    `category with id ${category_id} not exists`
+                  )
+                );
 
-      const newStore = await kysely
-        .insertInto("stores")
-        .values({
-          name,
-          user_id,
-        })
-        .returningAll()
-        .executeTakeFirst();
+              await trx
+                .insertInto("store_categories")
+                .values({
+                  store_id: newStore.id,
+                  category_id: category.id,
+                })
+                .returningAll()
+                .executeTakeFirstOrThrow(() =>
+                  CustomError.badRequest(
+                    "something went wrong at inserting store categories"
+                  )
+                );
 
-      if (!newStore)
-        throw CustomError.internalServer(
-          "something went wrong at creating store"
-        );
+              return category;
+            })
+          );
 
-      return StoreEntity.fromObject(newStore);
+          return { store: newStore, categories: storeCategories };
+        });
+
+      return StoreEntity.fromObject({
+        ...storeCateogoriesObj.store,
+        categories: storeCateogoriesObj.categories,
+      });
     } catch (error) {
+      // console.log(error);
       throw error;
     }
   }

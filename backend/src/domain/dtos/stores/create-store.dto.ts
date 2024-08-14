@@ -3,13 +3,14 @@ import { CustomError } from "../../errors";
 export class CreateStoreDto {
   private constructor(
     public readonly name: string,
-    public readonly user_id: number
+    public readonly user_id: number,
+    public readonly categories: number[]
   ) {}
 
   static create(object: {
     [key: string]: any;
   }): [CustomError?, CreateStoreDto?] {
-    const { name, user_id } = object;
+    const { name, user_id, categories } = object;
 
     if (!name) return [CustomError.badRequest("name property is required")];
 
@@ -25,6 +26,29 @@ export class CreateStoreDto {
     if (isNaN(Number(user_id)))
       return [CustomError.badRequest("user_id property must be a number")];
 
-    return [undefined, new CreateStoreDto(name, Number(user_id))];
+    if (!Array.isArray(categories)) {
+      return [CustomError.badRequest("categories property must be an array")];
+    }
+
+    if (!categories.length) {
+      return [CustomError.badRequest("categories property is empty")];
+    }
+
+    const isInvalidArray = categories.some((category) =>
+      isNaN(Number(category))
+    );
+
+    if (isInvalidArray) {
+      return [
+        CustomError.badRequest(
+          "categories property must be an array of numbers"
+        ),
+      ];
+    }
+
+    return [
+      undefined,
+      new CreateStoreDto(name, Number(user_id), categories.map(Number)),
+    ];
   }
 }
