@@ -11,19 +11,19 @@ export class ProductsKyselyPostgresRepository
     try {
       const newProduct = await kysely.transaction().execute(async (trx) => {
         await Promise.all([
-          await trx
+          trx
             .selectFrom("users")
             .where("id", "=", dto.user_id)
             .executeTakeFirstOrThrow(() =>
               CustomError.badRequest("user not exists")
             ),
-          await trx
+          trx
             .selectFrom("stores")
             .where("id", "=", dto.store_id)
             .executeTakeFirstOrThrow(() =>
               CustomError.badRequest("store not exists")
             ),
-          await trx
+          trx
             .selectFrom("categories")
             .where("id", "=", dto.category_id)
             .executeTakeFirstOrThrow(() =>
