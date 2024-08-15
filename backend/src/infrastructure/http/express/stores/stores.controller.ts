@@ -6,7 +6,10 @@ export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
   create = (req: Request, res: Response) => {
-    const [error, dto] = CreateStoreDto.create(req.body);
+    const [error, dto] = CreateStoreDto.create({
+      ...req.body,
+      user_id: req.session.user?.id,
+    });
 
     if (error)
       return res.status(error.statusCode).json({ error: error.message });

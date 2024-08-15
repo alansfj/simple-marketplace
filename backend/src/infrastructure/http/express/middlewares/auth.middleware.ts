@@ -5,8 +5,12 @@ import { JWT } from "../../../../adapters";
 // Necesario para poder asignar el objeto req.session.user
 declare module "express-serve-static-core" {
   interface Request {
-    session?: {
-      user?: any;
+    session: {
+      user: {
+        id: number;
+        email: string;
+        name: string;
+      } | null;
     };
   }
 }
