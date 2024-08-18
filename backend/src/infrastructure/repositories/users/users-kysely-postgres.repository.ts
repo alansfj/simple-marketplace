@@ -1,10 +1,10 @@
 import { RegisterUserDto } from "../../../domain/dtos";
 import { UserEntity } from "../../../domain/entities";
-import { AuthRepositoryInterface } from "../../../domain/repositories";
+import { UsersRepositoryInterface } from "../../../domain/repositories";
 
 import { kysely } from "../../database";
 
-export class AuthKyselyPostgresRepository implements AuthRepositoryInterface {
+export class UsersKyselyPostgresRepository implements UsersRepositoryInterface {
   async findUserByEmail(email: string): Promise<UserEntity | null> {
     const user = await kysely
       .selectFrom("users")
@@ -28,6 +28,4 @@ export class AuthKyselyPostgresRepository implements AuthRepositoryInterface {
 
     return newUser ? UserEntity.fromObject(newUser) : null;
   }
-
-  async logout() {}
 }

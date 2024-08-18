@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
+
 import { AuthServiceInterface } from "../../../../domain/services";
 import { LoginUserDto, RegisterUserDto } from "../../../../domain/dtos";
 
 export class AuthController {
-  constructor(private readonly service: AuthServiceInterface) {}
+  constructor(private readonly authService: AuthServiceInterface) {}
 
   register = (req: Request, res: Response) => {
     const [error, dto] = RegisterUserDto.create(req.body);
@@ -11,7 +12,7 @@ export class AuthController {
     if (error)
       return res.status(error.statusCode).json({ error: error.message });
 
-    this.service
+    this.authService
       .register(dto!)
       .then((user) => res.json(user))
       .catch((error) => {
@@ -26,7 +27,7 @@ export class AuthController {
     if (error)
       return res.status(error.statusCode).json({ error: error.message });
 
-    this.service
+    this.authService
       .login(dto!)
       .then(({ user, accessToken, refreshToken }) =>
         res
@@ -51,17 +52,9 @@ export class AuthController {
   };
 
   logout = (req: Request, res: Response) => {
-    this.service
-      .logout()
-      .then(() => {
-        res
-          .clearCookie("access_token")
-          .clearCookie("refresh_token")
-          .json({ message: "logout successful" });
-      })
-      .catch((error) => {
-        // console.log(error);
-        res.status(error.statusCode || 500).json({ error: error.message });
-      });
+    res
+      .clearCookie("access_token")
+      .clearCookie("refresh_token")
+      .json({ message: "logout successful" });
   };
 }

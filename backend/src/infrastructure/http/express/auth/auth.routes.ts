@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 
 import { AuthService, TokenService } from "../../../../domain/services";
 
-import { AuthKyselyPostgresRepository } from "../../../repositories";
+import { UsersKyselyPostgresRepository } from "../../../repositories";
 import { AuthController } from "./auth.controller";
 import { AuthMiddleware } from "../middlewares";
 
@@ -10,10 +10,10 @@ export class AuthRoutes {
   static get routes(): Router {
     const router = Router();
 
-    const repository = new AuthKyselyPostgresRepository();
+    const usersRepository = new UsersKyselyPostgresRepository();
     const tokenService = new TokenService();
-    const service = new AuthService(repository, tokenService);
-    const controller = new AuthController(service);
+    const authService = new AuthService(usersRepository, tokenService);
+    const controller = new AuthController(authService);
 
     router.post("/register", controller.register);
     router.post("/login", controller.login);

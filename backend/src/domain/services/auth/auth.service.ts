@@ -2,24 +2,24 @@ import { bcrypt } from "../../../adapters";
 import { RegisterUserDto, LoginUserDto } from "../../dtos";
 import { UserEntity } from "../../entities";
 import { CustomError } from "../../errors";
-import { AuthRepositoryInterface } from "../../repositories";
+import { UsersRepositoryInterface } from "../../repositories";
 import { TokenServiceInterface } from "../token";
 import { AuthServiceInterface } from "./auth.service.interface";
 
 export class AuthService implements AuthServiceInterface {
   constructor(
-    private readonly authRepository: AuthRepositoryInterface,
+    private readonly usersRepository: UsersRepositoryInterface,
     private readonly tokenService: TokenServiceInterface
   ) {}
 
   async register(dto: RegisterUserDto): Promise<UserEntity> {
-    const user = await this.authRepository.findUserByEmail(dto.email);
+    const user = await this.usersRepository.findUserByEmail(dto.email);
 
     if (user) throw CustomError.badRequest("user already exists");
 
     const hashedPassword = bcrypt.hashPassword(dto.password);
 
-    const newUser = await this.authRepository.registerUser({
+    const newUser = await this.usersRepository.registerUser({
       ...dto,
       password: hashedPassword,
     });
@@ -34,7 +34,7 @@ export class AuthService implements AuthServiceInterface {
   async login(
     dto: LoginUserDto
   ): Promise<{ user: UserEntity; accessToken: string; refreshToken: string }> {
-    const user = await this.authRepository.findUserByEmail(dto.email);
+    const user = await this.usersRepository.findUserByEmail(dto.email);
 
     if (!user) throw CustomError.badRequest("user email or password wrong");
 
@@ -70,9 +70,5 @@ export class AuthService implements AuthServiceInterface {
       accessToken,
       refreshToken,
     };
-  }
-
-  async logout(): Promise<void> {
-    return await this.authRepository.logout();
   }
 }

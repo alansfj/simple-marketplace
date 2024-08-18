@@ -6,5 +6,4 @@ export interface AuthServiceInterface {
   login(
     dto: LoginUserDto
   ): Promise<{ user: UserEntity; accessToken: string; refreshToken: string }>;
-  logout(): Promise<void>;
 }
