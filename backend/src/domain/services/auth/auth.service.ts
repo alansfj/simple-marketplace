@@ -1,12 +1,16 @@
-import { bcrypt, JWT } from "../../../adapters";
+import { bcrypt } from "../../../adapters";
 import { RegisterUserDto, LoginUserDto } from "../../dtos";
 import { UserEntity } from "../../entities";
 import { CustomError } from "../../errors";
 import { AuthRepositoryInterface } from "../../repositories";
+import { TokenServiceInterface } from "../token";
 import { AuthServiceInterface } from "./auth.service.interface";
 
 export class AuthService implements AuthServiceInterface {
-  constructor(private readonly authRepository: AuthRepositoryInterface) {}
+  constructor(
+    private readonly authRepository: AuthRepositoryInterface,
+    private readonly tokenService: TokenServiceInterface
+  ) {}
 
   async register(dto: RegisterUserDto): Promise<UserEntity> {
     const user = await this.authRepository.findUserByEmail(dto.email);
@@ -43,7 +47,7 @@ export class AuthService implements AuthServiceInterface {
       throw CustomError.badRequest(`user email or password wrong`);
     }
 
-    const accessToken = await JWT.generateToken(
+    const accessToken = await this.tokenService.generateToken(
       {
         id: user.id,
         email: user.email,
@@ -52,9 +56,7 @@ export class AuthService implements AuthServiceInterface {
       "15m"
     );
 
-    if (!accessToken) throw CustomError.internalServer("error creating jwt");
-
-    const refreshToken = await JWT.generateToken(
+    const refreshToken = await this.tokenService.generateToken(
       {
         id: user.id,
         email: user.email,
@@ -62,8 +64,6 @@ export class AuthService implements AuthServiceInterface {
       },
       "1d"
     );
-
-    if (!refreshToken) throw CustomError.internalServer("error creating jwt");
 
     return {
       user: UserEntity.fromObjectPublic(user),
