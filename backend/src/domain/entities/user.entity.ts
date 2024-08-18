@@ -3,14 +3,14 @@ export class UserEntity {
     public readonly id: number,
     public readonly name: string,
     public readonly email: string,
-    public readonly created_at?: Date,
-    public readonly password?: string
+    public readonly password: string,
+    public readonly created_at?: Date
   ) {}
 
   static fromObject(object: { [key: string]: any }): UserEntity {
-    const { id, name, email, password, created_at } = object;
+    const { id, name, email, password = "", created_at } = object;
 
-    return new UserEntity(id, name, email, created_at, password);
+    return new UserEntity(id, name, email, password, created_at);
   }
 
   static fromObjectPublic(object: { [key: string]: any }): UserEntity {
