@@ -7,6 +7,16 @@ import { kysely } from "../../database";
 export class StoresKyselyPostgresRepository
   implements StoreRepositoryInterface
 {
+  async findById(id: number): Promise<StoreEntity | null> {
+    const store = await kysely
+      .selectFrom("stores")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
+
+    return store ? StoreEntity.fromObject(store) : null;
+  }
+
   async createStore(
     dto: CreateStoreDto,
     categories: CategoryEntity[]
