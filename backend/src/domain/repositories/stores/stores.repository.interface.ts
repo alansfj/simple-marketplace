@@ -1,6 +1,9 @@
 import { CreateStoreDto } from "../../dtos";
-import { StoreEntity } from "../../entities";
+import { CategoryEntity, StoreEntity } from "../../entities";
 
 export interface StoreRepositoryInterface {
-  create(dto: CreateStoreDto): Promise<StoreEntity>;
+  createStore(
+    dto: CreateStoreDto,
+    categories: CategoryEntity[]
+  ): Promise<StoreEntity>;
 }

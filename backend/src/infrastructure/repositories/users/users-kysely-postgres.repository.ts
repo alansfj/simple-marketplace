@@ -5,6 +5,16 @@ import { UsersRepositoryInterface } from "../../../domain/repositories";
 import { kysely } from "../../database";
 
 export class UsersKyselyPostgresRepository implements UsersRepositoryInterface {
+  async findUserById(id: number): Promise<UserEntity | null> {
+    const user = await kysely
+      .selectFrom("users")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
+
+    return user ? UserEntity.fromObject(user) : null;
+  }
+
   async findUserByEmail(email: string): Promise<UserEntity | null> {
     const user = await kysely
       .selectFrom("users")
