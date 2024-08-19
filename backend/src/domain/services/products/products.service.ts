@@ -1,40 +1,21 @@
 import { CreateProductDto } from "../../dtos";
 import { ProductEntity } from "../../entities";
-import { CustomError } from "../../errors";
-import {
-  CategoriesRepositoryInterface,
-  ProductsRepositoryInterface,
-  StoreRepositoryInterface,
-  UsersRepositoryInterface,
-} from "../../repositories";
+import { ProductsRepositoryInterface } from "../../repositories";
+import { ValidationServiceInterface } from "../validations";
 import { ProductsServiceInterface } from "./products.service.interface";
 
 export class ProductsService implements ProductsServiceInterface {
   constructor(
     private readonly productsRepository: ProductsRepositoryInterface,
-    private readonly usersRepository: UsersRepositoryInterface,
-    private readonly storeRepository: StoreRepositoryInterface,
-    private readonly categoryRepository: CategoriesRepositoryInterface
+    private readonly validationsService: ValidationServiceInterface
   ) {}
 
   async create(dto: CreateProductDto): Promise<ProductEntity> {
-    const user = await this.usersRepository.findUserById(dto.user_id);
-
-    if (!user) {
-      throw CustomError.badRequest("user not exists");
-    }
-
-    const store = await this.storeRepository.findById(dto.store_id);
-
-    if (!store) {
-      throw CustomError.badRequest("store not exists");
-    }
-
-    const category = await this.categoryRepository.findById(dto.category_id);
-
-    if (!category) {
-      throw CustomError.badRequest("category not exists");
-    }
+    await Promise.all([
+      this.validationsService.validateUser(dto.user_id),
+      this.validationsService.validateStore(dto.store_id),
+      this.validationsService.validateCategory(dto.category_id),
+    ]);
 
     return await this.productsRepository.create(dto);
   }

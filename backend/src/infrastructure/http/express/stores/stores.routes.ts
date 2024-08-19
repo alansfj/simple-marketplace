@@ -1,7 +1,8 @@
 import { Router } from "express";
 
-import { StoresService } from "../../../../domain/services";
+import { StoresService, ValidationService } from "../../../../domain/services";
 import { StoresController } from "./stores.controller";
+
 import {
   CateogoriesKyselyPostgresRepository,
   StoresKyselyPostgresRepository,
@@ -16,11 +17,13 @@ export class StoresRoutes {
     const usersRepository = new UsersKyselyPostgresRepository();
     const categoriesRepository = new CateogoriesKyselyPostgresRepository();
 
-    const service = new StoresService(
-      storesRepository,
+    const validationService = new ValidationService(
       usersRepository,
+      storesRepository,
       categoriesRepository
     );
+
+    const service = new StoresService(storesRepository, validationService);
 
     const controller = new StoresController(service);
 
